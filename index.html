@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Solar and wind generation dashboard for a 50-home community in Johannesburg."
+    >
+    <title>Johannesburg Community Energy</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="js/api.js" defer></script>
+    <script src="js/power.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="page-header">
+        <div class="brand-mark">
+          <img
+            src="https://www.gov.za/themes/custom/tailwindcss/images/sa-coat-arms.svg"
+            alt="South African Coat of Arms"
+          >
+        </div>
+        <div class="heading-copy">
+          <p class="eyebrow">Johannesburg Living Estate · Gauteng</p>
+          <h1>Energy Dashboard for 50 Houses</h1>
+          <p class="subtitle"> Solar and Wind Power Available To Our Neighbourhood in Johannesburg.</p>
+        </div>
+        <div class="location" aria-label="Johannesburg, Gauteng, South Africa">
+          Johannesburg, Gauteng
+        </div>
+      </header>
+
+      <section class="metrics" aria-label="Current energy estimates">
+        <article class="metric-card solar-card">
+          <h2>Solar output</h2>
+          <p class="metric-value"><span id="solar-output">—</span><span class="unit">kW</span></p>
+          <p class="metric-note">From the latest forecast hour</p>
+        </article>
+
+        <article class="metric-card wind-card">
+          <h2>Wind output</h2>
+          <p class="metric-value"><span id="wind-output">—</span><span class="unit">kW</span></p>
+          <p class="metric-note">From the latest forecast hour</p>
+        </article>
+
+        <article class="metric-card total-card">
+          <h2>Total generation</h2>
+          <p class="metric-value"><span id="total-output">—</span><span class="unit">kW</span></p>
+          <p class="metric-note">Solar and wind combined</p>
+        </article>
+
+        <article class="metric-card energy-card">
+          <h2>Today's energy</h2>
+          <p class="metric-value"><span id="daily-energy">—</span><span class="unit">kWh</span></p>
+          <p class="metric-note">Estimated from hourly forecasts</p>
+        </article>
+
+        <article class="metric-card need-card">
+          <h2>Community need</h2>
+          <p class="metric-value">1,500<span class="unit">kWh/day</span></p>
+          <p class="metric-note">Typical use for 50 homes</p>
+        </article>
+
+        <article class="metric-card coverage-card">
+          <h2>Demand coverage</h2>
+          <p class="metric-value"><span id="coverage">—</span><span class="unit">%</span></p>
+          <p class="metric-note">Of the estimated daily demand</p>
+        </article>
+      </section>
+
+      <details class="calculation-panel">
+        <summary>How we calculate the estimates</summary>
+        <div class="calculation-content">
+          <article class="calculation-item">
+            <h3>Solar power</h3>
+            <p>Hourly sunlight and air temperature are used to estimate the farm's output:</p>
+            <code>400 × (irradiance ÷ 1,000) × [1 − 0.004 × (temperature − 25)] × 0.97</code>
+            <p class="calculation-note">The calculation uses a 400 kWp array, a −0.004/°C temperature coefficient and 97% inverter efficiency. Open-Meteo estimates sunlight for a 30° tilt facing north (azimuth 180°).</p>
+          </article>
+          <article class="calculation-item">
+            <h3>Wind power</h3>
+            <p>Wind speed measured at 100 m is adjusted to the turbine's 30 m hub height:</p>
+            <code>hub wind = 100 m wind × (30 ÷ 100)<sup>0.14</sup></code>
+            <p class="calculation-note">Below 3 m/s or at/above 25 m/s, output is 0 kW. Between 3 and 10 m/s, output follows the cubic power curve: <code>50 × (hub wind³ − 3³) ÷ (10³ − 3³)</code>. From 10 to below 25 m/s, output is rated at 50 kW.</p>
+          </article>
+          <article class="calculation-item">
+            <h3>Daily energy and demand</h3>
+            <p>Today's estimate adds each hourly solar and wind power value. Since each value represents one hour, the sum is an estimate in kWh.</p>
+            <code>coverage = estimated energy today ÷ 1,500 kWh × 100</code>
+            <p class="calculation-note">The community is 50 homes, with an assumed combined daily demand of 1,500 kWh. The 800 kWh battery is part of the system specification but is not yet simulated in these generation estimates.</p>
+          </article>
+        </div>
+      </details>
+
+      <section class="forecast-panel" aria-labelledby="forecast-title">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Looking ahead</p>
+            <h2 id="forecast-title">The next 24 hours</h2>
+          </div>
+          <p class="chart-unit">Power <span>(kW)</span></p>
+        </div>
+        <div class="chart-container">
+          <canvas
+            id="forecast-chart"
+            role="img"
+            aria-label="Line chart showing forecast solar, wind, and total power generation over the next 24 hours."
+          ></canvas>
+        </div>
+      </section>
+
+      <footer class="status-bar" aria-live="polite">
+        <p><span class="status-indicator" aria-hidden="true"></span><span id="update-status">Getting the latest weather…</span></p>
+        <p>Wind right now <strong id="current-wind-speed">—</strong><span> m/s</span></p>
+      </footer>
+    </main>
+  </body>
+</html>
